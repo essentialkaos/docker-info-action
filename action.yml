@@ -1,0 +1,65 @@
+name: "EK Docker Info Action"
+description: "Action for showing info about Docker images"
+author: "ESSENTIALKAOS"
+
+branding:
+  icon: "layers"  
+  color: "white"
+
+inputs:
+  image: 
+    description: "One or more Docker images"
+    required: true
+
+  show-labels:
+    description: "Show image labels"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - id: docker-info-print
+      name: Print Docker images info
+      shell: bash
+      run: |
+        # [docker-info-print]
+
+        for image in ${{inputs.image}} ; do
+
+          echo -e "\e[34mInspecting image \e[1m$image\e[0m"
+
+          if [[ -z $(docker images -q "$image" 2> /dev/null) ]] ; then
+            echo "::error ::There is no image with name $image"
+            echo "::endgroup::"
+            continue
+          fi
+
+          image_size=$(docker inspect -f "{{ .Size }}" "$image")
+          image_size_virt=$(docker inspect -f "{{ .VirtualSize }}" "$image")
+          image_working_dir=$(docker inspect -f "{{ .Config.WorkingDir }}" "$image")
+          image_created=$(docker inspect -f "{{ .Created }}" "$image")
+          image_created_date=$(date --date="$image_created" +'%Y/%m/%d %H:%M %Z')
+          image_entrypoints=$(docker inspect "$image" | jq -r '.[0].Config.Entrypoint // [] | join(" ")')
+          image_cmd=$(docker inspect "$image" | jq -r '.[0].Config.Cmd // [] | join(" ")')
+          image_ports=$(docker inspect "$image" | jq -r '.[0].Config.ExposedPorts // {} | keys | join(" ")')
+          image_layers=$(docker inspect "$image" | jq -r '.[0].RootFS.Layers | length')
+
+          echo -e ""
+          echo -e "  \e[1mSize:\e[0m        $(echo image_size | numfmt --to=si) ($image_size)"
+          echo -e "  \e[1mVirtualSize:\e[0m $(echo image_size_virt | numfmt --to=si) ($image_size_virt)"
+          echo -e "  \e[1mCreated:\e[0m     $image_created_date"
+          echo -e "  \e[1mEntrypoints:\e[0m ${image_entrypoints:-none}"
+          echo -e "  \e[1mCommand:\e[0m     ${image_cmd:-none}"
+          echo -e "  \e[1mPorts:\e[0m       ${image_ports:-none}"
+          echo -e "  \e[1mLayers:\e[0m      $image_layers"
+          echo -e ""
+
+          if [[ -n "${{inputs.show-labels}}" ]] ; then
+            echo -e "  \e[1mLabels:\e[0m\n"
+            docker inspect "$image" | jq -r '.[0].Config.Labels // [] | to_entries | .[] | "    "+.key+": "+.value'
+            echo -e ""
+          fi
+
+          echo "::endgroup::"
+
+        done
