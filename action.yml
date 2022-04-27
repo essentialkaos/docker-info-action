@@ -56,7 +56,7 @@ runs:
 
           if [[ -n "${{inputs.show-labels}}" ]] ; then
             echo -e "  \e[1mLabels:\e[0m\n"
-            docker inspect "$image" | jq -r '.[0].Config.Labels // [] | to_entries | .[] | "    "+.key+": "+.value'
+            docker inspect "$image" | jq -r '.[0].Config.Labels // [] | to_entries | .[] | .key+"###"+.value' | awk -F'###' '{printf "    \033[37m%40-s:\033[0m %s\n", $1, $2}'
             echo -e ""
           fi
 
