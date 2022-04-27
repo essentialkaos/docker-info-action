@@ -31,7 +31,7 @@ Add next code to your workflow file:
           docker build -f Dockerfile -t myimage .
 
       - name: Show info about built Docker image
-        uses: essentialkaos/docker-image-action@v1
+        uses: essentialkaos/docker-info-action@v1
         with:
           image: myimage
           show-labels: true
