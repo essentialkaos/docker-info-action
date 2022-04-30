@@ -26,7 +26,7 @@ runs:
 
         for image in ${{inputs.image}} ; do
 
-          echo -e "::group::\e[34mInspecting image \e[1m$image\e[0m"
+          echo -e "::group::\033[34mInspecting image \033[1m$image\033[0m"
 
           if [[ -z $(docker images -q "$image" 2> /dev/null) ]] ; then
             echo "::error ::There is no image with name $image"
@@ -45,17 +45,17 @@ runs:
           image_layers=$(docker inspect "$image" | jq -r '.[0].RootFS.Layers | length')
 
           echo -e ""
-          echo -e "  \e[1mSize:\e[0m        $(echo $image_size | numfmt --to=si) ($image_size)"
-          echo -e "  \e[1mVirtualSize:\e[0m $(echo $image_size_virt | numfmt --to=si) ($image_size_virt)"
-          echo -e "  \e[1mCreated:\e[0m     $image_created_date"
-          echo -e "  \e[1mEntrypoints:\e[0m ${image_entrypoints:-none}"
-          echo -e "  \e[1mCommand:\e[0m     ${image_cmd:-none}"
-          echo -e "  \e[1mPorts:\e[0m       ${image_ports:-none}"
-          echo -e "  \e[1mLayers:\e[0m      $image_layers"
+          echo -e "  \033[1mSize:\033[0m        $(echo $image_size | numfmt --to=si) ($image_size)"
+          echo -e "  \033[1mVirtualSize:\033[0m $(echo $image_size_virt | numfmt --to=si) ($image_size_virt)"
+          echo -e "  \033[1mCreated:\033[0m     $image_created_date"
+          echo -e "  \033[1mEntrypoints:\033[0m ${image_entrypoints:-none}"
+          echo -e "  \033[1mCommand:\033[0m     ${image_cmd:-none}"
+          echo -e "  \033[1mPorts:\033[0m       ${image_ports:-none}"
+          echo -e "  \033[1mLayers:\033[0m      $image_layers"
           echo -e ""
 
           if [[ -n "${{inputs.show-labels}}" ]] ; then
-            echo -e "  \e[1mLabels:\e[0m\n"
+            echo -e "  \033[1mLabels:\033[0m\n"
             docker inspect "$image" | jq -r '.[0].Config.Labels // [] | to_entries | .[] | .key+"###"+.value' | awk -F'###' '{printf "    \033[37m%40-s:\033[0m %s\n", $1, $2}'
             echo -e ""
           fi
