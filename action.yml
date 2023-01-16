@@ -52,7 +52,7 @@ runs:
           echo -e "  \033[1mCommand:\033[0m     ${image_cmd:-none}"
           echo -e "  \033[1mPorts:\033[0m       ${image_ports:-none}"
           echo -e "  \033[1mLayers:\033[0m      $image_layers"
-          docker history --format '{{.Size}}' "$image" | tac | grep -v '0B' | nl -w 3 -s ' ' -v 0
+          docker history --format '{{.Size}}' "$image" | tac | grep -v '0B' | nl -w 5 -s ' ' -v 0
           echo -e ""
 
           if [[ -n "${{inputs.show-labels}}" ]] ; then
