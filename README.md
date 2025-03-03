@@ -15,7 +15,7 @@ Add next code to your workflow file:
 
     steps:
       - name: Code checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
