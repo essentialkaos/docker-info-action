@@ -35,7 +35,8 @@ runs:
           fi
 
           image_size=$(docker inspect -f "{{ .Size }}" "$image")
-          image_size_virt=$(docker inspect -f "{{ .VirtualSize }}" "$image")
+          image_os=$(docker inspect -f "{{ .Os }}" "$image")
+          image_arch=$(docker inspect -f "{{ .Architecture }}" "$image")
           image_working_dir=$(docker inspect -f "{{ .Config.WorkingDir }}" "$image")
           image_created=$(docker inspect -f "{{ .Created }}" "$image")
           image_created_date=$(date --date="$image_created" +'%Y/%m/%d %H:%M %Z')
@@ -45,8 +46,8 @@ runs:
           image_layers=$(docker inspect "$image" | jq -r '.[0].RootFS.Layers | length')
 
           echo -e ""
+          echo -e "  \033[1mOS:\033[0m          $image_os/$image_arch"
           echo -e "  \033[1mSize:\033[0m        $(echo $image_size | numfmt --to=si) ($image_size)"
-          echo -e "  \033[1mVirtualSize:\033[0m $(echo $image_size_virt | numfmt --to=si) ($image_size_virt)"
           echo -e "  \033[1mCreated:\033[0m     $image_created_date"
           echo -e "  \033[1mEntrypoints:\033[0m ${image_entrypoints:-none}"
           echo -e "  \033[1mCommand:\033[0m     ${image_cmd:-none}"
@@ -57,7 +58,7 @@ runs:
 
           if [[ -n "${{inputs.show-labels}}" ]] ; then
             echo -e "  \033[1mLabels:\033[0m\n"
-            docker inspect "$image" | jq -r '.[0].Config.Labels // [] | to_entries | .[] | .key+"###"+.value' | awk -F'###' '{printf "    \033[37m%40-s:\033[0m %s\n", $1, $2}'
+            docker inspect "$image" | jq -r '.[0].Config.Labels // [] | to_entries | .[] | .key+"###"+.value' | awk -F'###' '{printf "    \033[37m%40-s\033[0m %s\n", $1, $2}'
             echo -e ""
           fi
 
